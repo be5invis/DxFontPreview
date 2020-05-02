@@ -111,6 +111,7 @@ protected:
     void OnFontVariationSettingsChange();
     void ToggleFontFallback();
     void ToggleJustify();
+    void ToggleEsacpe();
 
     void OnSelectNumber(uint32_t idc, const uint32_t& wmEvent, std::function<uint32_t(const FontSelector&)> fnGet, std::function<void(FontSelector&, uint32_t)> fnSet);
     void OnSelectIndex(uint32_t idc, uint32_t min, uint32_t max, std::function<void(FontSelector&, uint32_t)> fn);

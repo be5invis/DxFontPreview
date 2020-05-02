@@ -110,6 +110,13 @@ void MainWindow::Initialize() {
     THROW_IF_NULL_ALLOC(m_textLayout);
     THROW_IF_NULL_ALLOC(m_fontSource);
 
+    auto scaffold = CreateUiScaffold();
+    HFONT hFontEdit = CreateFont(scaffold.scaleDpi(16), 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET,
+        OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+        DEFAULT_PITCH | FF_DONTCARE, TEXT("Consolas"));
+
+    SendMessageW(GetDlgItem(m_hwnd, IdcEditText), WM_SETFONT, (WPARAM)hFontEdit, TRUE);
+
     SetLayoutText(true, CommandIdTextLatin);
     OnMove();
     OnSize();
@@ -225,6 +232,10 @@ MainWindow::DialogProcResult CALLBACK MainWindow::OnCommand(HWND hwnd, WPARAM wP
         ToggleJustify();
         break;
 
+    case CommandIdToggleParseEscape:
+        ToggleEsacpe();
+        break;
+
     case IdcEditFontFamilyName:
         switch(wmEvent) {
         case CBN_SELCHANGE:
@@ -326,6 +337,7 @@ MainWindow::DialogProcResult CALLBACK MainWindow::OnCommand(HWND hwnd, WPARAM wP
             CheckMenuItem(hMenu, CommandIdDirectionLeftToRightTopToBottom + m_fontSelector.readingDirection, MF_CHECKED);
             CheckMenuItem(hMenu, CommandIdToggleFontFallback, m_fontSelector.doFontFallback ? MF_CHECKED : MF_UNCHECKED);
             CheckMenuItem(hMenu, CommandIdToggleJustify, m_fontSelector.doJustify ? MF_CHECKED : MF_UNCHECKED);
+            CheckMenuItem(hMenu, CommandIdToggleParseEscape, m_fontSelector.parseEscapes ? MF_CHECKED : MF_UNCHECKED);
             TrackPopupMenu(hMenu, TPM_LEFTALIGN, buttonRect.left, buttonRect.bottom, 0, m_hwnd, nullptr);            
             break;
         }
@@ -481,6 +493,12 @@ void MainWindow::ToggleFontFallback() {
 
 void MainWindow::ToggleJustify() {
     m_fontSelector.doJustify = !m_fontSelector.doJustify;
+    m_textLayout->SetFont(*m_fontSource, m_fontSelector);
+    ReflowLayout();
+}
+
+void MainWindow::ToggleEsacpe() {
+    m_fontSelector.parseEscapes = !m_fontSelector.parseEscapes;
     m_textLayout->SetFont(*m_fontSource, m_fontSelector);
     ReflowLayout();
 }

@@ -19,11 +19,12 @@ public:
     void Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams);
 
 private:
-    void ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout);
+    void ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, std::wstring& text);
 
     wil::com_ptr<IDWriteFactory> m_dwriteFactory;
     FontSelector m_fontState;
     std::wstring m_text;
+    std::wstring m_parsedText;
     wil::com_ptr<IDWriteTextFormat3> m_textFormat;
 
     float m_width;

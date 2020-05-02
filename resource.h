@@ -1499,6 +1499,7 @@
 #define CommandIdDirectionBottomToTopRightToLeft 40058
 #define CommandIdToggleFontFallback     40059
 #define CommandIdToggleJustify          40060
+#define CommandIdToggleParseEscape      40061
 #define SC_SIZE                         0xF000
 #define SC_SEPARATOR                    0xF00F
 #define SC_MOVE                         0xF010

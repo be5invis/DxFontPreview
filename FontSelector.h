@@ -65,5 +65,6 @@ public:
 
     bool doFontFallback = false;
     bool doJustify = false;
+    bool parseEscapes = true;
     std::wstring localeName;
 };

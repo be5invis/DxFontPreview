@@ -3,14 +3,19 @@
 #include "TextFormat.h"
 #include "FeatureVariationSetting.h"
 #include "Render.h"
+#include "StringParser.h"
 
 void TextLayout::SetFont(const FlowFontSource& fontSource, const FontSelector& fs) {
 	m_textFormat = TextFormat::Create(m_dwriteFactory, fontSource, fs);
+    if (fs.parseEscapes != m_fontState.parseEscapes) {
+        m_parsedText = fs.parseEscapes ? ParseStringLiteral(m_text) : m_text;
+    }
 	m_fontState = fs;
 }
 
 void TextLayout::SetText(const wchar_t* text, UINT32 textLength) {
     m_text.assign(text, textLength);
+    m_parsedText = m_fontState.parseEscapes ? ParseStringLiteral(m_text) : m_text;
 }
 
 void TextLayout::GetText(_Out_ const wchar_t** text, _Out_ UINT32* textLength) {
@@ -27,13 +32,13 @@ void TextLayout::Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com
     if (!m_text.size() || !m_textFormat) return;
 
     wil::com_ptr<IDWriteTextLayout> layout;
-    THROW_IF_FAILED(m_dwriteFactory->CreateTextLayout(m_text.data(), m_text.size(), m_textFormat.get(), m_width, m_height, &layout));
-    ApplylFeatures(layout);
+    THROW_IF_FAILED(m_dwriteFactory->CreateTextLayout(m_parsedText.data(), m_parsedText.size(), m_textFormat.get(), m_width, m_height, &layout));
+    ApplylFeatures(layout, m_parsedText);
     wil::com_ptr<IDWriteTextRenderer1> renderer = CreateTextRenderer(m_dwriteFactory, target, renderingParams);
     layout->Draw(nullptr, renderer.get(), 0, 0);
 }
 
-void TextLayout::ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout) {
+void TextLayout::ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, std::wstring& text) {
     FeatureSettings featureSettings = m_fontState.userFeaturesEnabled
         ? ParseFeatures(m_fontState.userFeatureSettings)
         : FeatureSettings();
@@ -42,5 +47,5 @@ void TextLayout::ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout) {
     for (const auto& feature : featureSettings) {
         THROW_IF_FAILED(typography->AddFontFeature(feature));
     };
-    THROW_IF_FAILED(layout->SetTypography(typography.get(), { 0, static_cast<UINT32>(m_text.size()) }));
+    THROW_IF_FAILED(layout->SetTypography(typography.get(), { 0, static_cast<UINT32>(text.size()) }));
 }

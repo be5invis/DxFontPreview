@@ -45,6 +45,7 @@
 #include <functional>
 #include <numeric>
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <memory>
 #include <vector>
