@@ -8,11 +8,13 @@ void TextLayout::SetFont(const FlowFontSource& fontSource, const FontSelector& f
 	m_textFormat = TextFormat::Create(m_dwriteFactory, fontSource, fs);
     m_parsedText = ParseInputDoc(m_text, fs);
     m_fontState = fs;
+    UpdateLayout();
 }
 
 void TextLayout::SetText(const wchar_t* text, UINT32 textLength) {
     m_text.assign(text, textLength);
     m_parsedText = ParseInputDoc(m_text, m_fontState);
+    UpdateLayout();
 }
 
 void TextLayout::GetText(_Out_ const wchar_t** text, _Out_ UINT32* textLength) {
@@ -23,19 +25,30 @@ void TextLayout::GetText(_Out_ const wchar_t** text, _Out_ UINT32* textLength) {
 void TextLayout::SetSize(float width, float height) {
     m_width = width;
     m_height = height;
+    if (m_layout) {
+        THROW_IF_FAILED(m_layout->SetMaxWidth(m_width));
+        THROW_IF_FAILED(m_layout->SetMaxHeight(m_height));
+    } else {
+        UpdateLayout();
+    }
 }
 
 void TextLayout::Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams) {
+    if (!m_layout) return;
+    wil::com_ptr<IDWriteTextRenderer1> renderer = CreateTextRenderer(m_dwriteFactory, target, renderingParams);
+    m_layout->Draw(nullptr, renderer.get(), 0, 0);
+}
+
+void TextLayout::UpdateLayout() {
     if (!m_text.size() || !m_textFormat) return;
 
-    wil::com_ptr<IDWriteTextLayout> layout;
-    THROW_IF_FAILED(m_dwriteFactory->CreateTextLayout(m_parsedText.text.data(), m_parsedText.text.size(), m_textFormat.get(), m_width, m_height, &layout));
+    THROW_IF_FAILED(m_dwriteFactory->CreateTextLayout(m_parsedText.text.data(), m_parsedText.text.size(), m_textFormat.get(), m_width, m_height, &m_layout));
 
     std::vector<DWRITE_FONT_AXIS_VALUE> axisValues();
     for (const auto& runStyle : m_parsedText.styles) {
-        ApplylFeatures(layout, runStyle);
+        ApplylFeatures(m_layout, runStyle);
     }
-    if (auto layout4 = layout.try_query<IDWriteTextLayout4>()) {
+    if (auto layout4 = m_layout.try_query<IDWriteTextLayout4>()) {
         UINT32 axesCount = m_textFormat->GetFontAxisValueCount();
         std::vector<DWRITE_FONT_AXIS_VALUE> defaultVariation(axesCount);
         THROW_IF_FAILED(m_textFormat->GetFontAxisValues(defaultVariation.data(), axesCount));
@@ -43,9 +56,6 @@ void TextLayout::Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com
             ApplyVariation(defaultVariation, layout4, runStyle);
         }
     }
-
-    wil::com_ptr<IDWriteTextRenderer1> renderer = CreateTextRenderer(m_dwriteFactory, target, renderingParams);
-    layout->Draw(nullptr, renderer.get(), 0, 0);
 }
 
 void TextLayout::ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg) {

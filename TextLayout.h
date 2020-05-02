@@ -18,6 +18,7 @@ public:
     void Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams);
 
 private:
+    void UpdateLayout();
     void ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg);
     void ApplyVariation(const std::vector<DWRITE_FONT_AXIS_VALUE>& defaultVariation, wil::com_ptr<IDWriteTextLayout4> layout, const RunStyle& rg);
 
@@ -26,6 +27,8 @@ private:
     std::wstring m_text;
     ParsedDocument m_parsedText;
     wil::com_ptr<IDWriteTextFormat3> m_textFormat;
+    wil::com_ptr<IDWriteTextLayout> m_layout;
+
 
     float m_width;
     float m_height;
