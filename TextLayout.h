@@ -1,9 +1,8 @@
 #pragma once
-#pragma once
 
 #include "FontSource.h"
 #include "FontSelector.h"
-#include "FeatureVariationSetting.h"
+#include "DocParser.h"
 
 class TextLayout {
 public:
@@ -19,15 +18,15 @@ public:
     void Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams);
 
 private:
-    void ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, std::wstring& text);
+    void ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg);
+    void ApplyVariation(const std::vector<DWRITE_FONT_AXIS_VALUE>& defaultVariation, wil::com_ptr<IDWriteTextLayout4> layout, const RunStyle& rg);
 
     wil::com_ptr<IDWriteFactory> m_dwriteFactory;
     FontSelector m_fontState;
     std::wstring m_text;
-    std::wstring m_parsedText;
+    ParsedDocument m_parsedText;
     wil::com_ptr<IDWriteTextFormat3> m_textFormat;
 
     float m_width;
     float m_height;
-
 };

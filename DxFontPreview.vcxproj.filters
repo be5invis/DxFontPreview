@@ -30,9 +30,6 @@
     <ClInclude Include="FontSelector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FeatureVariationSetting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TextFormat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,7 +42,7 @@
     <ClInclude Include="FontSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StringParser.h">
+    <ClInclude Include="DocParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -54,9 +51,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WindowUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FeatureVariationSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextFormat.cpp">
@@ -71,7 +65,7 @@
     <ClCompile Include="FontSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextParser.cpp">
+    <ClCompile Include="DocParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

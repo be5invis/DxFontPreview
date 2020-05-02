@@ -182,12 +182,11 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="DxFontPreview.h" />
-    <ClInclude Include="FeatureVariationSetting.h" />
     <ClInclude Include="FontSource.h" />
     <ClInclude Include="FontSelector.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="StringParser.h" />
+    <ClInclude Include="DocParser.h" />
     <ClInclude Include="TextFormat.h" />
     <ClInclude Include="TextLayout.h" />
     <ClInclude Include="WindowUtil.h" />
@@ -197,12 +196,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxFontPreview.cpp" />
-    <ClCompile Include="FeatureVariationSetting.cpp" />
     <ClCompile Include="FontSource.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="TextFormat.cpp" />
     <ClCompile Include="TextLayout.cpp" />
-    <ClCompile Include="TextParser.cpp" />
+    <ClCompile Include="DocParser.cpp" />
     <ClCompile Include="WindowUtil.cpp" />
   </ItemGroup>
   <ItemGroup>

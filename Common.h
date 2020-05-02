@@ -49,6 +49,7 @@
 #include <sstream>
 #include <memory>
 #include <vector>
+#include <stack>
 #include <utility>
 #include <limits>
 #include <system_error>

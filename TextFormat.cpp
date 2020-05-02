@@ -1,7 +1,6 @@
 #include "Common.h"
 #include "FontSelector.h"
 #include "TextFormat.h"
-#include "FeatureVariationSetting.h"
 
 std::wstring GetFamilyName(wil::com_ptr<IDWriteFontFace3> fontFace) {
     wil::com_ptr<IDWriteLocalizedStrings> localizedNames;
@@ -49,26 +48,6 @@ wil::com_ptr<IDWriteFontFace3> SelectFirstFont(wil::com_ptr<IDWriteFontSet> font
     return fontFace3;
 }
 
-void ApplyVariation(wil::com_ptr<IDWriteTextFormat3> fmt3, const FontSelector& fs) {
-    if (!fs.userVariationEnabled) return;
-    UINT32 axesCount = fmt3->GetFontAxisValueCount();
-    std::vector<DWRITE_FONT_AXIS_VALUE> axisValues(axesCount);
-    THROW_IF_FAILED(fmt3->GetFontAxisValues(axisValues.data(), axesCount));
-    VariationSettings vs = ParseVariations(fs.userVariationSettings);
-    for (auto& user : vs) {
-        bool found = false;
-        for (auto& item : axisValues) {
-            if (item.axisTag != user.axisTag) continue;
-            item.value = user.value;
-            found = true;
-        }
-        if (!found) {
-            axisValues.push_back({ DWRITE_FONT_AXIS_TAG(user.axisTag), user.value });
-        }
-    }
-    THROW_IF_FAILED(fmt3->SetFontAxisValues(axisValues.data(), axisValues.size()));
-}
-
 void DisableFontFallback(wil::com_ptr<IDWriteFactory> factory, wil::com_ptr<IDWriteTextFormat3> fmt3) {
     auto factory2 = factory.try_query<IDWriteFactory2>();
     if (factory2) {
@@ -79,6 +58,17 @@ void DisableFontFallback(wil::com_ptr<IDWriteFactory> factory, wil::com_ptr<IDWr
         THROW_IF_FAILED(fmt3->SetFontFallback(fallback.get()));
     }
 }
+
+void ApplyVariation(wil::com_ptr<IDWriteFontFace3> fontFace3, wil::com_ptr<IDWriteTextFormat3> fmt3, const FontSelector& fs) {
+    if (!fs.userVariationEnabled) return;
+    auto fontFace5 = fontFace3.try_query<IDWriteFontFace5>();
+    if (!fontFace5) return;
+    UINT32 axesCount = fontFace5->GetFontAxisValueCount();
+    std::vector<DWRITE_FONT_AXIS_VALUE> axisValues(axesCount);
+    THROW_IF_FAILED(fontFace5->GetFontAxisValues(axisValues.data(), axesCount));
+    THROW_IF_FAILED(fmt3->SetFontAxisValues(axisValues.data(), axisValues.size()));
+}
+
 
 wil::com_ptr<IDWriteTextFormat3> TextFormat::Create(wil::com_ptr<IDWriteFactory> factory, const FlowFontSource& fontSource, const FontSelector& fs) {
     wil::com_ptr<IDWriteFactory3> factory3 = factory.query<IDWriteFactory3>();
@@ -102,7 +92,7 @@ wil::com_ptr<IDWriteTextFormat3> TextFormat::Create(wil::com_ptr<IDWriteFactory>
 
     wil::com_ptr<IDWriteTextFormat3> fmt3 = fmt.query<IDWriteTextFormat3>();
 
-    ApplyVariation(fmt3, fs);
+    ApplyVariation(fontFace3, fmt3, fs);
     if (!fs.doFontFallback) DisableFontFallback(factory, fmt3);
 
     THROW_IF_FAILED(fmt3->SetReadingDirection(g_dwriteReadingDirectionValues[fs.readingDirection]));
