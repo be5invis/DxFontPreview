@@ -40,11 +40,10 @@ void TextLayout::Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com
 }
 
 void TextLayout::UpdateLayout() {
-    if (!m_text.size() || !m_textFormat) return;
+    if (!m_textFormat) return;
 
     THROW_IF_FAILED(m_dwriteFactory->CreateTextLayout(m_parsedText.text.data(), m_parsedText.text.size(), m_textFormat.get(), m_width, m_height, &m_layout));
 
-    std::vector<DWRITE_FONT_AXIS_VALUE> axisValues();
     for (const auto& runStyle : m_parsedText.styles) {
         ApplylFeatures(m_layout, runStyle);
     }
