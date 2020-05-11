@@ -235,6 +235,14 @@ MainWindow::DialogProcResult CALLBACK MainWindow::OnCommand(HWND hwnd, WPARAM wP
     case CommandIdToggleParseEscape:
         ToggleEsacpe();
         break;
+    
+    case CommandIdToggleAdvanceMarkings:
+        ToggleMarkings(RenderMarkings::Advance);
+        break;
+
+    case CommandIdTogglePositionMarkings:
+        ToggleMarkings(RenderMarkings::Positioning);
+        break;
 
     case IdcEditFontFamilyName:
         switch(wmEvent) {
@@ -338,6 +346,8 @@ MainWindow::DialogProcResult CALLBACK MainWindow::OnCommand(HWND hwnd, WPARAM wP
             CheckMenuItem(hMenu, CommandIdToggleFontFallback, m_fontSelector.doFontFallback ? MF_CHECKED : MF_UNCHECKED);
             CheckMenuItem(hMenu, CommandIdToggleJustify, m_fontSelector.doJustify ? MF_CHECKED : MF_UNCHECKED);
             CheckMenuItem(hMenu, CommandIdToggleParseEscape, m_fontSelector.parseEscapes ? MF_CHECKED : MF_UNCHECKED);
+            CheckMenuItem(hMenu, CommandIdToggleAdvanceMarkings, m_markingsOptions & RenderMarkings::Advance ? MF_CHECKED : MF_UNCHECKED);
+            CheckMenuItem(hMenu, CommandIdTogglePositionMarkings, m_markingsOptions& RenderMarkings::Positioning ? MF_CHECKED : MF_UNCHECKED);
             TrackPopupMenu(hMenu, TPM_LEFTALIGN, buttonRect.left, buttonRect.bottom, 0, m_hwnd, nullptr);            
             break;
         }
@@ -449,9 +459,9 @@ void MainWindow::OnFontSizeChange(const uint32_t& wmEvent) {
     OnSelectNumber(IdcSelectFontSize, wmEvent,
         [](const FontSelector& fs) {return fs.fontEmSize; },
         [](FontSelector& fs, uint32_t value) {fs.fontEmSize = value; });
+    UpdateRenderingMode();
     ReflowLayout();
 }
-
 
 void MainWindow::OnFontDirectionChange(const uint32_t& wmEvent) {
     m_fontSelector.readingDirection = ReadingDirection(wmEvent - CommandIdDirectionLeftToRightTopToBottom); 
@@ -500,6 +510,11 @@ void MainWindow::ToggleJustify() {
 void MainWindow::ToggleEsacpe() {
     m_fontSelector.parseEscapes = !m_fontSelector.parseEscapes;
     m_textLayout->SetFont(*m_fontSource, m_fontSelector);
+    ReflowLayout();
+}
+
+void MainWindow::ToggleMarkings(RenderMarkings flag) {
+    m_markingsOptions ^= flag;
     ReflowLayout();
 }
 
@@ -580,11 +595,8 @@ void MainWindow::OnSize()
     ReflowLayout();
 }
 
-
 void MainWindow::OnMove()
 {
-    // Updates rendering parameters according to current monitor.
-
     if (m_dwriteFactory == NULL) return; // Not initialized yet.
     HMONITOR monitor = MonitorFromWindow(m_hwnd, MONITOR_DEFAULTTONEAREST);
     if (monitor == m_hMonitor) return;
@@ -600,16 +612,18 @@ void MainWindow::UpdateRenderingMode() {
         MonitorFromWindow(m_hwnd, MONITOR_DEFAULTTONEAREST),
         &screenMode
     );
+
+    DWRITE_RENDERING_MODE mode = screenMode->GetRenderingMode();
+    if (mode != DWRITE_RENDERING_MODE_OUTLINE) mode = DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC;
     m_dwriteFactory->CreateCustomRenderingParams(
         screenMode->GetGamma(),
         screenMode->GetEnhancedContrast(),
         screenMode->GetClearTypeLevel(),
         screenMode->GetPixelGeometry(),
-        DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC,
+        mode,
         &m_renderingParams
     );
 }
-
 
 void MainWindow::ReflowLayout() {
     RECT canvasRect;
@@ -624,7 +638,7 @@ void MainWindow::ReflowLayout() {
     Rectangle(memoryHdc, 0, 0, canvasRect.right, canvasRect.bottom);
 
     // Draw all of the produced glyph runs.
-    m_textLayout->Render(m_renderTarget, m_renderingParams);
+    m_textLayout->Render(m_renderTarget, m_renderingParams, m_markingsOptions);
 
     // Blit
     HBITMAP bitmapSrc = (HBITMAP) GetCurrentObject(memoryHdc, OBJ_BITMAP);

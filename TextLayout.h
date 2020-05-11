@@ -3,6 +3,7 @@
 #include "FontSource.h"
 #include "FontSelector.h"
 #include "DocParser.h"
+#include "Render.h"
 
 class TextLayout {
 public:
@@ -15,7 +16,7 @@ public:
     void GetText(_Out_ const wchar_t** text, _Out_ UINT32* textLength);
     void SetSize(float width, float height);
 
-    void Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams);
+    void Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams, RenderMarkings options);
 
 private:
     void UpdateLayout();
@@ -28,7 +29,6 @@ private:
     ParsedDocument m_parsedText;
     wil::com_ptr<IDWriteTextFormat3> m_textFormat;
     wil::com_ptr<IDWriteTextLayout> m_layout;
-
 
     float m_width;
     float m_height;

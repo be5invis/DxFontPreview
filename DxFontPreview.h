@@ -112,6 +112,7 @@ protected:
     void ToggleFontFallback();
     void ToggleJustify();
     void ToggleEsacpe();
+    void ToggleMarkings(RenderMarkings flag);
 
     void OnSelectNumber(uint32_t idc, const uint32_t& wmEvent, std::function<uint32_t(const FontSelector&)> fnGet, std::function<void(FontSelector&, uint32_t)> fnSet);
     void OnSelectIndex(uint32_t idc, uint32_t min, uint32_t max, std::function<void(FontSelector&, uint32_t)> fn);
@@ -141,6 +142,7 @@ protected:
     FontSelector m_fontSelector;
     std::unique_ptr<TextLayout> m_textLayout;
     std::unique_ptr<FlowFontSource> m_fontSource;
+    RenderMarkings m_markingsOptions = RenderMarkings::None;
 
 protected:
     HWND m_hwnd;

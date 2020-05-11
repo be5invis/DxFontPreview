@@ -1500,6 +1500,8 @@
 #define CommandIdToggleFontFallback     40059
 #define CommandIdToggleJustify          40060
 #define CommandIdToggleParseEscape      40061
+#define CommandIdToggleAdvanceMarkings  40062
+#define CommandIdTogglePositionMarkings 40063
 #define SC_SIZE                         0xF000
 #define SC_SEPARATOR                    0xF00F
 #define SC_MOVE                         0xF010

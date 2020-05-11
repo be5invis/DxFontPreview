@@ -23,8 +23,8 @@ void TextLayout::GetText(_Out_ const wchar_t** text, _Out_ UINT32* textLength) {
 };
 
 void TextLayout::SetSize(float width, float height) {
-    m_width = width;
-    m_height = height;
+    m_width = std::max(PADDING * 2.0, width - PADDING * 2.0);
+    m_height = std::max(PADDING * 2.0, height - PADDING * 2.0);
     if (m_layout) {
         THROW_IF_FAILED(m_layout->SetMaxWidth(m_width));
         THROW_IF_FAILED(m_layout->SetMaxHeight(m_height));
@@ -33,10 +33,16 @@ void TextLayout::SetSize(float width, float height) {
     }
 }
 
-void TextLayout::Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams) {
+void TextLayout::Render(wil::com_ptr<IDWriteBitmapRenderTarget> target, wil::com_ptr<IDWriteRenderingParams> renderingParams, RenderMarkings options) {
     if (!m_layout) return;
-    wil::com_ptr<IDWriteTextRenderer1> renderer = CreateTextRenderer(m_dwriteFactory, target, renderingParams);
-    m_layout->Draw(nullptr, renderer.get(), 0, 0);
+
+    if (options) {
+        wil::com_ptr<IDWriteTextRenderer1> markingsRenderer = CreateMarkingsRenderer(m_dwriteFactory, target, renderingParams, options);
+        m_layout->Draw(nullptr, markingsRenderer.get(), 0, 0);
+    }
+
+    wil::com_ptr<IDWriteTextRenderer1> textRenderer = CreateTextRenderer(m_dwriteFactory, target, renderingParams);
+    m_layout->Draw(nullptr, textRenderer.get(), 0, 0);
 }
 
 void TextLayout::UpdateLayout() {
