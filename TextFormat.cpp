@@ -88,7 +88,7 @@ wil::com_ptr<IDWriteTextFormat3> TextFormat::Create(wil::com_ptr<IDWriteFactory>
     THROW_IF_FAILED(factory3->CreateFontCollectionFromFontSet(filteredFontSet.get(), &collection));
 
     wil::com_ptr<IDWriteTextFormat> fmt;
-    THROW_IF_FAILED(factory3->CreateTextFormat(familyName.data(), collection.get(), weight, style, stretch, fs.fontEmSize, fs.localeName.data(), &fmt));
+    THROW_IF_FAILED(factory3->CreateTextFormat(familyName.data(), collection.get(), weight, style, stretch, fs.fontEmSize, L"en-US", &fmt));
 
     wil::com_ptr<IDWriteTextFormat3> fmt3 = fmt.query<IDWriteTextFormat3>();
 
