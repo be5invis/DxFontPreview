@@ -20,7 +20,7 @@ public:
 
 private:
     void UpdateLayout();
-    void ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg);
+    void ApplyFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg);
     void ApplyVariation(const std::vector<DWRITE_FONT_AXIS_VALUE>& defaultVariation, wil::com_ptr<IDWriteTextLayout4> layout, const RunStyle& rg);
 
     wil::com_ptr<IDWriteFactory> m_dwriteFactory;

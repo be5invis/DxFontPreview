@@ -51,7 +51,7 @@ void TextLayout::UpdateLayout() {
     THROW_IF_FAILED(m_dwriteFactory->CreateTextLayout(m_parsedText.text.data(), m_parsedText.text.size(), m_textFormat.get(), m_width, m_height, &m_layout));
     (void) m_layout->SetLocaleName(m_fontState.localeName.data(), { 0, static_cast<UINT32>(m_parsedText.text.size()) });
     for (const auto& runStyle : m_parsedText.styles) {
-        ApplylFeatures(m_layout, runStyle);
+        ApplyFeatures(m_layout, runStyle);
     }
     if (auto layout4 = m_layout.try_query<IDWriteTextLayout4>()) {
         UINT32 axesCount = m_textFormat->GetFontAxisValueCount();
@@ -63,7 +63,7 @@ void TextLayout::UpdateLayout() {
     }
 }
 
-void TextLayout::ApplylFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg) {
+void TextLayout::ApplyFeatures(wil::com_ptr<IDWriteTextLayout> layout, const RunStyle& rg) {
     if (!m_fontState.userFeaturesEnabled) return;
     wil::com_ptr<IDWriteTypography> typography;
     THROW_IF_FAILED(m_dwriteFactory->CreateTypography(&typography));
